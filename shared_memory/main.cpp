@@ -1,11 +1,14 @@
+//g++ --std=c++11 main.cpp -o sm -lboost_system -lrt -lpthread
+
 #include <array>
-#include <vector>
-#include <sstream>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
+#include <sstream>
 #include <string>
 #include <type_traits>
+#include <vector>
+
 
 namespace lidia
 {
@@ -184,8 +187,7 @@ public:
     m_mutex.lock();
   }
 
-  T& operator*() { return m_data; }
-  T* operator->() { return m_data; }
+  T& data() { return *m_data; }
 
   ~MutexedData() { m_mutex.unlock(); }
 
@@ -201,13 +203,17 @@ public:
   SharedMemoryManager(const std::string& name);
 
   template<typename T>
-  typename std::enable_if<!isReadOnly, void>::type update(const T& newValue) { get() = newValue; }
+  typename std::enable_if<!isReadOnly, void>::type update(const T& newValue)
+  {
+    get() = newValue;
+  }
 
   template<typename T>
-  typename std::enable_if<!isReadOnly, MutexedData<T>>::type& get();
+  typename std::enable_if<!isReadOnly, std::unique_ptr<MutexedData<T>>>::type
+  get();
 
   template<typename T>
-  const T& get() const;
+  std::unique_ptr<MutexedData<const T>> get() const;
 
   template<typename T>
   static constexpr int offset()
@@ -309,9 +315,9 @@ template<typename T, typename... FunArgs>
 typename std::enable_if<sizeof...(FunArgs) == 1>::type
 SharedMemoryManager<isReadOnly, Args...>::init()
 {
-  constexpr int index = this->index<T>();
+  constexpr int idx = index<T>();
 
-  m_regions[index] = std::move(boost::interprocess::mapped_region{
+  m_regions[idx] = std::move(boost::interprocess::mapped_region{
     m_sharedMemory, boost::interprocess::read_write, offset<T>(), sizeof(T) });
 }
 
@@ -320,9 +326,9 @@ template<typename T, typename... FunArgs>
 typename std::enable_if<sizeof...(FunArgs) != 1>::type
 SharedMemoryManager<isReadOnly, Args...>::init()
 {
-  constexpr int index = this->index<T>();
+  constexpr int idx = index<T>();
 
-  m_regions[index] = std::move(boost::interprocess::mapped_region{
+  m_regions[idx] = std::move(boost::interprocess::mapped_region{
     m_sharedMemory, boost::interprocess::read_write, offset<T>(), sizeof(T) });
 
   init<FunArgs...>();
@@ -336,27 +342,28 @@ SharedMemoryManager<isReadOnly, Args...>::~SharedMemoryManager()
 
 template<bool isReadOnly, typename... Args>
 template<typename T>
-typename std::enable_if<!isReadOnly, MutexedData<T>>::type&
+typename std::enable_if<!isReadOnly, std::unique_ptr<MutexedData<T>>>::type
 SharedMemoryManager<isReadOnly, Args...>::get()
 {
-  constexpr int index = this->index<T>();
+  constexpr int idx = index<T>();
 
-  return MutexedData<T>{*reinterpret_cast<T*>(m_regions[index].get_address(), m_mutexes[index])};
+  return std::unique_ptr<MutexedData<T>>{ new MutexedData<T>{
+    reinterpret_cast<T*>(m_regions[idx].get_address()), m_mutexes[idx] } };
 }
 
 template<bool isReadOnly, typename... Args>
 template<typename T>
-const T& SharedMemoryManager<isReadOnly, Args...>::get() const
+std::unique_ptr<MutexedData<const T>>
+SharedMemoryManager<isReadOnly, Args...>::get() const
 {
-  constexpr int index = this->index<T>();
+  constexpr int idx = index<T>();
 
-  return MutexedData<const T>{*reinterpret_cast<T*>(m_regions[index].get_address(), m_mutexes[index])};
+  return std::unique_ptr<MutexedData<const T>>{ new MutexedData<T>{
+    reinterpret_cast<const T*>(m_regions[idx].get_address()), m_mutexes[idx] } };
 }
 }
 
-
-int main(int argc, char *argv[])
-{
-    lidia::SharedMemory<int, unsigned, long> sharedMemory;
-    return 0;
+int main(int argc, char *argv[]) {
+  lidia::SharedMemory<int, unsigned, long> sharedMemory{"SharedMemory"};
+  return 0;
 }
