@@ -3,10 +3,6 @@
 #include <future>
 
 
-int g = 0;
-std::mutex m;
-
-
 class A
 {
 public:
