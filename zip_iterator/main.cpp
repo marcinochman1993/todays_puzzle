@@ -10,14 +10,14 @@ using namespace std;
 using namespace boost;
 
 template <typename... Args>
-auto makeBeginZipIterator(Args &&... args) // universal reference - remove "&&" and check what happens
+auto makeBeginZipIterator(const Args&... args) //  remove "&" and check what happens
 {
   auto t = boost::make_tuple(args.begin()...);
   return make_zip_iterator(t);
 }
 
 template <typename... Args>
-auto makeEndZipIterator(Args &&... args) // universal reference
+auto makeEndZipIterator(const Args &... args) //remove "&" and check what happens
 {
   auto t = boost::make_tuple(args.end()...);
   return make_zip_iterator(t);
