@@ -11,14 +11,16 @@ RetType quickExponent(PowerType n)
   std::cout << "Running quickExponent\n";
   RetType x = e<RetType>;
 
-  if (n < 0) {
+  if (n < 0)
+  {
     n = 1 / n;
     x = 1 / x;
   }
 
   RetType y = 1;
 
-  while (n > 1) {
+  while (n > 1)
+  {
     bool isEven = n % 2 == 0;
 
     y = isEven ? y : x * y;
