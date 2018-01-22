@@ -5,7 +5,7 @@
 // r
 // watch array[10]
 // c
-// .. watchpoint works - we now where's the bug
+// .. watchpoint works - we now know where's the bug
 
 #include <iostream>
 
