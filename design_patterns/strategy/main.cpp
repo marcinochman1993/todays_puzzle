@@ -44,7 +44,6 @@ ProgramOptions KeyValueFileParser::parse(const std::string& filePath)
       oss >> key >> value;
 
       options.insert(make_pair(key, value));
-
     }
   }
 
@@ -90,14 +89,9 @@ ProgramOptions parseFile(const std::string& filePath)
   std::unique_ptr<IFileParser> parser;
 
   if(isJson(filePath))
-  {
     parser.reset(new JsonParser{});
-  }
   else
-  {
     parser.reset(new KeyValueFileParser{});
-  }
-
 
   return parser->parse(filePath);
 }
