@@ -1,43 +1,52 @@
 #include <iostream>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
+template <typename T>
 class Node
 {
 public:
-    Node(int data) : m_data(data){}
-    Node* m_leftChild  = nullptr;
-    Node* m_rightChild = nullptr;
-    int   m_data;
+    Node(T data) : m_data(data){}
+    shared_ptr<Node<T>> m_leftChild  = nullptr;
+    shared_ptr<Node<T>> m_rightChild = nullptr;
+    T   m_data;
 };
 
+template <typename T>
 class BinaryTree
 {
 public:
-    BinaryTree(Node* root)
+    BinaryTree(shared_ptr<Node<T>> root)
     {
         m_root = root;
     }
-    void add(int newData)
+
+    shared_ptr<Node<T>> getRoot()
     {
-        vector<Node*> tempQueue;
+        return m_root;
+    }
+
+    void add(T newData)
+    {
+        vector<shared_ptr<Node<T>>> tempQueue;
         tempQueue.push_back(m_root);
 
         while(!tempQueue.empty())
         {
-            Node* tempNode = tempQueue.front();
+            shared_ptr<Node<T>> tempNode = tempQueue.front();
             tempQueue.erase(tempQueue.begin());
             if(!tempNode)
             {
-                tempNode = new Node(newData);
+                tempNode = make_shared<Node<T>>(newData);
                 break;
             }
             else
             {
                 if(!tempNode->m_leftChild)
                 {
-                    tempNode->m_leftChild = new Node(newData);
+                    tempNode->m_leftChild = make_shared<Node<T>>(newData);
                     break;
                 }
                 else
@@ -46,7 +55,7 @@ public:
                 }
                 if(!tempNode->m_rightChild)
                 {
-                    tempNode->m_rightChild = new Node(newData);
+                    tempNode->m_rightChild = make_shared<Node<T>>(newData);
                     break;
                 }
                 else
@@ -56,14 +65,42 @@ public:
             }
         }
     }
+    void printTreePreOrder(shared_ptr<Node<T>> node)
+    {
+        if(node)
+        {
+            cout << node->m_data << ", ";
+            printTreePreOrder(node->m_leftChild);
+            printTreePreOrder(node->m_rightChild);
+        }
+    }
+    void printTreeInOrder(shared_ptr<Node<T>> node)
+    {
+        if(node)
+        {
+            printTreeInOrder(node->m_leftChild);
+            cout << node->m_data << ", ";
+            printTreeInOrder(node->m_rightChild);
+        }
+    }
+    void printTreePostOrder(shared_ptr<Node<T>> node)
+    {
+        if(node)
+        {
+            printTreePostOrder(node->m_leftChild);
+            printTreePostOrder(node->m_rightChild);
+            cout << node->m_data << ", ";
+        }
+    }
+
     void printTree()
     {
-        vector<Node*> tempQueue;
+        vector<shared_ptr<Node<T>>> tempQueue;
         tempQueue.push_back(m_root);
 
         while(!tempQueue.empty())
         {
-            Node* tempNode = tempQueue.front();
+            shared_ptr<Node<T>> tempNode = tempQueue.front();
             tempQueue.erase(tempQueue.begin());
 
             if(tempNode)
@@ -82,18 +119,25 @@ public:
     }
 
 private:
-    Node* m_root;
+    shared_ptr<Node<T>> m_root;
 };
 
 int main()
 {
-    Node root(0);
-    BinaryTree tree(&root);
+    shared_ptr<Node<char>> root = make_shared<Node<char>>('A');
+    BinaryTree<char> tree(root);
 
     for(int i = 1; i <= 10; ++i)
     {
-        tree.add(i);
+        tree.add('A' + i);
     }
     tree.printTree();
-	return 0;
+    cout<<endl;
+    tree.printTreePreOrder(tree.getRoot());
+    cout << endl;
+    tree.printTreeInOrder(tree.getRoot());
+    cout << endl;
+    tree.printTreePostOrder(tree.getRoot());
+    cout << endl;
+    return 0;
 }
