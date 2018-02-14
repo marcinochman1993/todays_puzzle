@@ -11,7 +11,7 @@ public:
     Node(T data) : m_data(data){}
     shared_ptr<Node<T>> m_leftChild  = nullptr;
     shared_ptr<Node<T>> m_rightChild = nullptr;
-    T   m_data;
+    T                   m_data;
 };
 
 template <typename T>
@@ -28,7 +28,7 @@ public:
         return m_root;
     }
 
-    void add(T newData)
+    void add(T newData) //BFS
     {
         vector<shared_ptr<Node<T>>> tempQueue;
         tempQueue.push_back(m_root);
@@ -65,35 +65,7 @@ public:
             }
         }
     }
-    void printTreePreOrder(shared_ptr<Node<T>> node)
-    {
-        if(node)
-        {
-            cout << node->m_data << ", ";
-            printTreePreOrder(node->m_leftChild);
-            printTreePreOrder(node->m_rightChild);
-        }
-    }
-    void printTreeInOrder(shared_ptr<Node<T>> node)
-    {
-        if(node)
-        {
-            printTreeInOrder(node->m_leftChild);
-            cout << node->m_data << ", ";
-            printTreeInOrder(node->m_rightChild);
-        }
-    }
-    void printTreePostOrder(shared_ptr<Node<T>> node)
-    {
-        if(node)
-        {
-            printTreePostOrder(node->m_leftChild);
-            printTreePostOrder(node->m_rightChild);
-            cout << node->m_data << ", ";
-        }
-    }
-
-    void printTree()
+    void printTree() //BFS
     {
         vector<shared_ptr<Node<T>>> tempQueue;
         tempQueue.push_back(m_root);
@@ -117,7 +89,33 @@ public:
             }
         }
     }
-
+    void printTreePreOrder(shared_ptr<Node<T>> node) //DFS
+    {
+        if(node)
+        {
+            cout << node->m_data << ", ";
+            printTreePreOrder(node->m_leftChild);
+            printTreePreOrder(node->m_rightChild);
+        }
+    }
+    void printTreeInOrder(shared_ptr<Node<T>> node) //DFS
+    {
+        if(node)
+        {
+            printTreeInOrder(node->m_leftChild);
+            cout << node->m_data << ", ";
+            printTreeInOrder(node->m_rightChild);
+        }
+    }
+    void printTreePostOrder(shared_ptr<Node<T>> node) //DFS
+    {
+        if(node)
+        {
+            printTreePostOrder(node->m_leftChild);
+            printTreePostOrder(node->m_rightChild);
+            cout << node->m_data << ", ";
+        }
+    }
 private:
     shared_ptr<Node<T>> m_root;
 };
