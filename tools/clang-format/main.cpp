@@ -59,7 +59,8 @@ namespace lidia
 
 
 
-
+    return vec
+      .size();
   }
 
   template <typename T, typename U>
